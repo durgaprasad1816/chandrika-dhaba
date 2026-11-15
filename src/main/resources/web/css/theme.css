@@ -1,0 +1,124 @@
+@font-face { font-family: "Cinzel"; font-weight: 500; font-display: swap; src: url(/fonts/cinzel-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Cinzel"; font-weight: 600; font-display: swap; src: url(/fonts/cinzel-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 400; font-display: swap; src: url(/fonts/poppins-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 500; font-display: swap; src: url(/fonts/poppins-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Poppins"; font-weight: 600; font-display: swap; src: url(/fonts/poppins-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Yatra One"; font-weight: 400; font-display: swap; src: url(/fonts/yatra-one-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Noto Sans Telugu"; font-weight: 400; font-display: swap; unicode-range: U+0C00-0C7F; src: url(/fonts/noto-sans-telugu-telugu-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Noto Sans Telugu"; font-weight: 600; font-display: swap; unicode-range: U+0C00-0C7F; src: url(/fonts/noto-sans-telugu-telugu-600-normal.woff2) format("woff2"); }
+
+:root {
+  --gold: #f6b703;
+  --gold-deep: #d99a00;
+  --gold-soft: #fde8a1;
+  --cream: #fff8e1;
+  --olive: #3f4d1c;
+  --olive-dark: #2a3411;
+  --olive-mid: #5b6e2a;
+  --olive-soft: #e7ecd2;
+  --ink: #26300f;
+  --muted: #6e7650;
+  --white: #ffffff;
+  --danger:#d6382b;
+  --ok: #2e7d32;
+  --radius: 16px;
+  --shadow: 0 6px 18px rgba(42,52,17,.16);
+  --font: "Poppins", "Noto Sans Telugu", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Yatra One", "Poppins", "Noto Sans Telugu", serif;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--cream);
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+
+.btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 11px 20px;
+  font-weight: 600;
+  font-size: 15px;
+  background: var(--olive);
+  color: var(--gold-soft);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  min-height: 44px;
+}
+.btn:hover { background: var(--olive-dark); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.btn.gold { background: var(--gold); color: var(--olive-dark); }
+.btn.gold:hover { background: var(--gold-deep); }
+.btn.ghost { background: transparent; color: var(--olive); box-shadow: inset 0 0 0 2px var(--olive); }
+.btn.ghost:hover { background: var(--olive-soft); }
+.btn.danger { background: var(--danger); color: #ffffff; }
+.btn.small { padding: 6px 14px; min-height: 34px; font-size: 13px; }
+.btn.block { display: block; width: 100%; }
+
+.field { display: block; margin: 0 0 14px; }
+.field > span { display: block; font-size: 13px; font-weight: 600; color: var(--olive); margin: 0 0 5px 2px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid #d9d4b0;
+  background: #fffdf4;
+  font-size: 16px;
+  min-height: 46px;
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--olive-mid); box-shadow: 0 0 0 3px rgba(91,110,42,.22); }
+.field.bad input, .field.bad select { border-color: var(--danger); background: #fff4f2; }
+.field .err { display: none; color: var(--danger); font-size: 12.5px; margin: 4px 0 0 2px; }
+.field.bad .err { display: block; }
+
+.toast {
+  position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 14px); transform: translate(-50%, -30px);
+  background: var(--olive-dark); color: #ffffff; padding: 11px 18px; border-radius: 999px;
+  font-size: 14px; opacity: 0; pointer-events: none; transition: all .25s ease; z-index: 100;
+  max-width: 92vw; text-align: center; box-shadow: var(--shadow);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.err { background: var(--danger); }
+
+.veg-mark, .nv-mark {
+  display: inline-block; width: 15px; height: 15px; border: 2px solid var(--ok); border-radius: 3px; position: relative; flex: none;
+}
+.veg-mark::after { content: ""; position: absolute; inset: 2px; background: var(--ok); border-radius: 50%; }
+.nv-mark { border-color: var(--danger); }
+.nv-mark::after { content: ""; position: absolute; left: 50%; top: 1px; transform: translateX(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 7px solid var(--danger); }
+
+.rs::before { content: "\20B9"; font-family: "Poppins", sans-serif; margin-right: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+
+/* ===== Chandrika Dhaba premium black + deep-red theme ===== */
+:root { --gold:#d9a84e; --gold-deep:#b77c25; --gold-soft:#f5dfad; --cream:#0b1710; --olive:#13281c; --olive-dark:#08110c; --olive-mid:#2c6d48; --olive-soft:#152d20; --ink:#f7f0e4; --muted:#b9aaa0; --danger:#d6382b; --ok:#31834c; --white:#ffffff; --radius:15px; --shadow:0 12px 32px rgba(3,7,5,.45); }
+body { color:var(--ink); background:radial-gradient(ellipse at 80% 0%,#173826 0,transparent 38%),#09120d; }
+.btn { background:#b1521b; color:#ffffff; border-radius:10px; } .btn:hover { background:#ce5f1f; }
+.btn.gold { background:var(--gold); color:#0c1e14; } .btn.ghost { color:var(--gold-soft); box-shadow:inset 0 0 0 1px #2c6d48; }
+.field > span { color:var(--gold-soft); } .field input,.field select,.field textarea { color:#ffffff; background:#11251a; border:1px solid #2a5a3f; }
+
+/* ===== Chandrika Dhaba premium charcoal / deep-red / gold theme ===== */
+:root {
+  --gold:#e7b65b; --gold-deep:#b87920; --gold-soft:#ffe3a0;
+  --cream:#0a150e; --olive:#102117; --olive-dark:#07100b; --olive-mid:#b1521b;
+  --olive-soft:#152d20; --ink:#f7f0e7; --muted:#c0ada5; --white:#fffaf3;
+  --danger:#d6382b; --ok:#3f8f54; --radius:16px;
+  --shadow:0 10px 32px rgba(3,7,5,.42);
+  --font:"Poppins","Noto Sans Telugu",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-display:"Yatra One","Noto Sans Telugu","Poppins",serif;
+}
+html,body { background:#08120c !important; color:#f7f0e7 !important; }
+body { background-image:radial-gradient(ellipse at 20% 0%,rgba(38,93,62,.18),transparent 42%),radial-gradient(ellipse at 100% 45%,rgba(44,109,72,.10),transparent 40%); }

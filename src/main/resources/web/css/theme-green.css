@@ -1,0 +1,17 @@
+/* Final theme layer: deep green page like the welcome screen, gold lines, terracotta buttons. Loaded last. */
+:root {
+  --green-page: #173f27;
+  --green-panel: #10301f;
+  --gold: #d4b04f;
+  --terracotta: #d4691f;
+}
+html, body { background: var(--green-page) !important; color: #f6f0dd !important; }
+body {
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(74, 105, 45, .45), transparent 55%),
+    radial-gradient(ellipse at 50% 110%, rgba(10, 36, 21, .7), transparent 50%) !important;
+  background-attachment: fixed !important;
+}
+.login { background: radial-gradient(ellipse at 50% 20%, #2d5a31 0%, #1a4d2e 55%, #123b23 100%) !important; }
+h1, h2, h3, .brand, .brand-name, .logo-text { font-family: "Cinzel", "Yatra One", Georgia, serif; letter-spacing: .04em; }
+.btn.gold, .btn.primary, button.primary { background: linear-gradient(180deg, #e0762a, #b85a1c); color: #fff8ea; border-color: #e2c36a; }
