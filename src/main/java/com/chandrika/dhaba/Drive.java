@@ -53,7 +53,11 @@ final class Drive {
     private static final Pattern ID_PARAM = Pattern.compile("[?&]id=([A-Za-z0-9_-]{10,100})");
 
     private final Path configFile;
+<<<<<<< HEAD
     private volatile Store store;
+=======
+    private final Store store;
+>>>>>>> origin/main
     private final ZoneId zone;
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).followRedirects(HttpClient.Redirect.NORMAL).build();
 
@@ -81,12 +85,16 @@ final class Drive {
     private final Object workerLock = new Object();
     private volatile boolean workerStarted = false;
 
+<<<<<<< HEAD
     private final Path dir;
 
     void attach(Store s) { this.store = s; }
 
     Drive(Path dir, Store store, ZoneId zone) {
         this.dir = dir;
+=======
+    Drive(Path dir, Store store, ZoneId zone) {
+>>>>>>> origin/main
         this.configFile = dir.resolve("google.json");
         this.store = store;
         this.zone = zone;
@@ -94,9 +102,12 @@ final class Drive {
         String envId = System.getenv("DHABA_GOOGLE_CLIENT_ID"), envSecret = System.getenv("DHABA_GOOGLE_CLIENT_SECRET");
         if (clientId.isEmpty() && envId != null && !envId.isBlank()) clientId = envId.strip();
         if (clientSecret.isEmpty() && envSecret != null && !envSecret.isBlank()) clientSecret = envSecret.strip();
+<<<<<<< HEAD
         // On hosts that wipe files (Render free plan) the sign-in is kept in these three settings instead of google.json.
         String envRefresh = System.getenv("DHABA_GOOGLE_REFRESH_TOKEN");
         if (refreshToken.isEmpty() && envRefresh != null && !envRefresh.isBlank()) { refreshToken = envRefresh.strip(); needsReconnect = false; }
+=======
+>>>>>>> origin/main
     }
 
     // ================================================================= persistence
@@ -172,8 +183,11 @@ final class Drive {
         m.put("uploadedInvoices", invoices.size());
         m.put("driveImages", files.size());
         m.put("lastError", lastError);
+<<<<<<< HEAD
         m.put("lastBackup", lastBackupAt);
         m.put("backupError", backupError);
+=======
+>>>>>>> origin/main
         m.put("todayFolderName", LocalDate.now(zone).toString());
         return m;
     }
@@ -311,8 +325,11 @@ final class Drive {
             }
             startWorker();
             wake();
+<<<<<<< HEAD
             startBackupWorker();
             markDirty();
+=======
+>>>>>>> origin/main
             return mail;
         } catch (DriveException e) {
             throw ApiException.bad("Google sign-in failed: " + e.getMessage());
@@ -561,6 +578,7 @@ final class Drive {
         } catch (DriveException ignored) { /* a leftover file in Drive is harmless */ }
     }
 
+<<<<<<< HEAD
 
     // ================================================================= backup + restore of ALL data (for hosts that erase files)
     // store.json (dishes, waiters, settings, open tables), bills.jsonl, collections.jsonl and a copy of the Drive picture index
@@ -756,6 +774,8 @@ final class Drive {
         return status();
     }
 
+=======
+>>>>>>> origin/main
     // ================================================================= invoices
 
     private String invoiceRoot() throws DriveException {
@@ -878,7 +898,10 @@ final class Drive {
 
     /** Called at start-up: resume anything that was waiting when the app was last stopped. */
     void resume() {
+<<<<<<< HEAD
         startBackupWorker();
+=======
+>>>>>>> origin/main
         boolean any;
         synchronized (this) { any = connected() && !pending.isEmpty(); }
         if (any) { startWorker(); wake(); }

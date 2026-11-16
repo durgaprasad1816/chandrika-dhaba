@@ -27,6 +27,7 @@ public final class Main {
 
     private Main() {}
 
+<<<<<<< HEAD
     private static java.nio.channels.FileChannel lockChannel;
     private static java.nio.channels.FileLock lock;
 
@@ -54,6 +55,12 @@ public final class Main {
         int port = 8080;
         String password = System.getenv("DHABA_PASSWORD");
         String dataDir = System.getenv("DHABA_DATA");   // null = use the data folder next to the app (see defaultDataDir)
+=======
+    public static void main(String[] args) throws Exception {
+        int port = 8080;
+        String password = System.getenv("DHABA_PASSWORD");
+        String dataDir = System.getenv("DHABA_DATA") != null ? System.getenv("DHABA_DATA") : "data";
+>>>>>>> origin/main
         if (System.getenv("PORT") != null) port = Integer.parseInt(System.getenv("PORT").trim());
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("--port") && i + 1 < args.length) port = Integer.parseInt(args[++i]);
@@ -61,6 +68,7 @@ public final class Main {
             else if (args[i].equals("--password") && i + 1 < args.length) password = args[++i];
         }
 
+<<<<<<< HEAD
         Path dir = dataDir != null ? Paths.get(dataDir).toAbsolutePath().normalize() : defaultDataDir();
         Files.createDirectories(dir);
         // Two copies of the app on the same data folder overwrite each other's saves (old data "comes back"): allow only one.
@@ -79,6 +87,11 @@ public final class Main {
         drive.restoreIfNewer();
         Store store = new Store(dir, drive);
         Runtime.getRuntime().addShutdownHook(new Thread(drive::flushBackup, "flush-backup"));
+=======
+        Path dir = Paths.get(dataDir).toAbsolutePath().normalize();
+        Files.createDirectories(dir);
+        Store store = new Store(dir);
+>>>>>>> origin/main
         if (password != null && !password.isBlank()) {
             if (password.length() < 6) { System.err.println("Password must be at least 6 characters."); return; }
             store.setStartupPassword(password);

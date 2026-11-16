@@ -70,9 +70,13 @@ final class Store {
     private long nextCat = 1;
     private long lastBackup = 0;
 
+<<<<<<< HEAD
     Store(Path dir) { this(dir, null); }
 
     Store(Path dir, Drive prepared) {
+=======
+    Store(Path dir) {
+>>>>>>> origin/main
         this.dir = dir;
         this.storeFile = dir.resolve("store.json");
         this.billsFile = dir.resolve("bills.jsonl");
@@ -96,8 +100,12 @@ final class Store {
         }
         loadBills();
         loadCollections();
+<<<<<<< HEAD
         this.drive = prepared != null ? prepared : new Drive(dir, this, zone);
         this.drive.attach(this);
+=======
+        this.drive = new Drive(dir, this, zone);
+>>>>>>> origin/main
         this.media = new Media(dir, uploadsDir, privateDir, drive);
         drive.resume();
     }
@@ -281,7 +289,10 @@ final class Store {
             Files.writeString(tmp, Json.stringify(m), StandardCharsets.UTF_8);
             Files.move(tmp, storeFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             backupIfDue();
+<<<<<<< HEAD
             if (drive != null) drive.markDirty();
+=======
+>>>>>>> origin/main
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -18,6 +18,7 @@ Notes
   or at https://myaccount.google.com/permissions.
 * Keys and the sign-in token are stored in `data/google.json` - keep the `data` folder private and do not share it.
 * Alternative: set environment variables `DHABA_GOOGLE_CLIENT_ID` and `DHABA_GOOGLE_CLIENT_SECRET` instead of typing the keys.
+<<<<<<< HEAD
 
 ---
 
@@ -40,3 +41,5 @@ One-time setup:
 
 Pictures already go straight to Drive. Use **Back up now** to force a backup. Free Render also sleeps after ~15 min idle;
 the first visit afterwards takes about a minute while the app wakes and restores.
+=======
+>>>>>>> origin/main

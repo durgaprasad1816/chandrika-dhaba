@@ -258,12 +258,15 @@ final class Api {
             out.put("queued", n);
             c.json(200, out);
         });
+<<<<<<< HEAD
         r.post("/api/manager/google/backup-now", true, c -> c.json(200, store.drive.backupNow().entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new))));
         r.post("/api/manager/google/host-key", true, c -> {
             Map<String, Object> out = ok();
             out.put("refreshToken", store.drive.refreshTokenForHost());
             c.json(200, out);
         });
+=======
+>>>>>>> origin/main
         r.post("/api/manager/google/retry", true, c -> { store.drive.startWorker(); store.drive.wake(); c.json(200, googleStatus(c)); });
         r.post("/api/manager/google/migrate", true, c -> {
             if (!store.drive.connected()) throw ApiException.conflict("Sign in with Google first.");
