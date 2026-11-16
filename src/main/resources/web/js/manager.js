@@ -874,11 +874,8 @@
       if (g.invoiceFolderName) q = "Invoice folder: " + g.invoiceFolderName + " · " + q;
       $("gQueue").textContent = q;
       if (!$("gSyncDate").value) $("gSyncDate").value = todayIst();
-<<<<<<< HEAD
       var bs = g.backupError ? "⚠ " + g.backupError : (g.lastBackup ? "Last backup: " + new Date(g.lastBackup).toLocaleString() : "No backup yet; it runs a few seconds after your next change.");
       $("gBackupStatus").textContent = bs;
-=======
->>>>>>> origin/main
     }
   }
 
@@ -918,7 +915,6 @@
   $("gSync").addEventListener("click", function () {
     gCall("POST", "/api/manager/google/sync-invoices", { date: $("gSyncDate").value }, function (g) { return g.queued ? g.queued + " invoice(s) are being uploaded" : "Nothing new to upload for that day"; });
   });
-<<<<<<< HEAD
   $("gBackup").addEventListener("click", function () { gCall("POST", "/api/manager/google/backup-now", {}, "Backup finished"); });
   $("gHostKey").addEventListener("click", function () {
     api("POST", "/api/manager/google/host-key", {}).then(function (r) {
@@ -927,8 +923,6 @@
       b.textContent = "Add this in Render > Environment (keep it secret):\nDHABA_GOOGLE_REFRESH_TOKEN=" + r.refreshToken + "\n(also add DHABA_GOOGLE_CLIENT_ID and DHABA_GOOGLE_CLIENT_SECRET with the keys from Google Cloud)";
     }).catch(function (e) { toast(e.message, true); });
   });
-=======
->>>>>>> origin/main
   $("gRetry").addEventListener("click", function () { gCall("POST", "/api/manager/google/retry", {}, "Retrying waiting uploads"); });
   $("gMigrate").addEventListener("click", function () {
     $("gMigrate").disabled = true;
