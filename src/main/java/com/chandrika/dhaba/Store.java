@@ -1,5 +1,6 @@
 package com.chandrika.dhaba;
 
+import com.chandrika.dhaba.Models.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,16 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
-
-import com.chandrika.dhaba.Models.*;
-import com.chandrika.dhaba.Models.Bill;
-import com.chandrika.dhaba.Models.Category;
-import com.chandrika.dhaba.Models.Line;
-import com.chandrika.dhaba.Models.MenuItem;
-import com.chandrika.dhaba.Models.Order;
-import com.chandrika.dhaba.Models.Settings;
-import com.chandrika.dhaba.Models.TableState;
-import com.chandrika.dhaba.Models.Waiter;
 
 /**
  * All the dhaba's data and rules. Everything is kept in memory and saved to
@@ -79,9 +70,7 @@ final class Store {
     private long nextCat = 1;
     private long lastBackup = 0;
 
-    Store(Path dir) {
-        this(dir, null);
-    }
+    Store(Path dir) { this(dir, null); }
 
     Store(Path dir, Drive prepared) {
         this.dir = dir;
@@ -292,9 +281,7 @@ final class Store {
             Files.writeString(tmp, Json.stringify(m), StandardCharsets.UTF_8);
             Files.move(tmp, storeFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             backupIfDue();
-            if (drive != null) {
-                drive.markDirty();
-            }
+            if (drive != null) drive.markDirty();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -396,15 +383,50 @@ final class Store {
         return settings.managerView();
     }
 
-    /** The manager password is chosen when the app starts (--password or DHABA_PASSWORD); there is no change-password screen. */
+    /**
+     * --password / DHABA_PASSWORD only sets the first password. Once the manager has chosen their own password in
+     * Settings it is kept, so a restart (or a host setting left behind) never replaces it.
+     */
     synchronized void setStartupPassword(String password) {
         if (password == null || password.isEmpty()) return;
+        if (!settings.defaultPassword) return;
         if (Auth.constantEquals(Auth.hash(password, settings.passSalt), settings.passHash)) return;
         settings.passSalt = Auth.newSalt();
         settings.passHash = Auth.hash(password, settings.passSalt);
         settings.defaultPassword = Auth.constantEquals(password, DEFAULT_PASSWORD);
         save();
         audit("manager password set at startup");
+    }
+
+    /** Settings > Manager login: change the username and/or password. The current password is always required. */
+    Map<String, Object> changeLogin(String currentPassword, String newUser, String newPassword) {
+        String user, salt, hash;
+        synchronized (this) { user = settings.managerUser; salt = settings.passSalt; hash = settings.passHash; }
+        // slow hash outside the lock
+        if (currentPassword == null || !Auth.constantEquals(Auth.hash(currentPassword, salt), hash)) throw ApiException.bad("Your current password is not correct");
+        String nu = newUser == null ? "" : newUser.strip();
+        String np = newPassword == null ? "" : newPassword;
+        if (nu.isEmpty()) nu = user;
+        if (!nu.matches("[A-Za-z0-9._@-]{3,40}")) throw ApiException.bad("Username must be 3 to 40 letters, numbers or . _ - @ (no spaces)");
+        if (!np.isEmpty()) {
+            if (np.length() < 6) throw ApiException.bad("New password must be at least 6 characters");
+            if (np.length() > 100) throw ApiException.bad("New password is too long");
+            if (np.equals(DEFAULT_PASSWORD)) throw ApiException.bad("Choose a password different from the starting password");
+        }
+        if (np.isEmpty() && nu.equals(user)) throw ApiException.bad("Nothing to change: type a new username or a new password");
+        String newSalt = np.isEmpty() ? null : Auth.newSalt();
+        String newHash = np.isEmpty() ? null : Auth.hash(np, newSalt);
+        synchronized (this) {
+            settings.managerUser = nu;
+            if (newHash != null) {
+                settings.passSalt = newSalt;
+                settings.passHash = newHash;
+                settings.defaultPassword = false;
+            }
+            save();
+            audit("manager login changed");
+            return settings.managerView();
+        }
     }
 
     // ================================================================= validation helpers

@@ -134,6 +134,16 @@
           <button class="btn gold" type="submit">Save settings</button>
         </form>
 
+        <form class="card" id="credForm" autocomplete="off">
+          <h3>Manager login</h3>
+          <p class="hint">Change the username and password you use to open this manager page. Only someone who knows the current password can change them.</p>
+          <label class="field"><span>Username</span><input id="lgUser" maxlength="40" autocapitalize="off" autocomplete="off"></label>
+          <label class="field"><span>New password (leave empty to keep the current one)</span><input id="lgNew" type="password" minlength="6" maxlength="100" autocomplete="new-password"></label>
+          <label class="field"><span>Type the new password again</span><input id="lgNew2" type="password" maxlength="100" autocomplete="new-password"></label>
+          <label class="field"><span>Current password (required)</span><input id="lgCur" type="password" maxlength="100" autocomplete="current-password" required></label>
+          <button class="btn gold" type="submit">Save login</button>
+        </form>
+
         <div>
           <div class="card" id="splashCard">
             <h3>Welcome screen picture</h3>

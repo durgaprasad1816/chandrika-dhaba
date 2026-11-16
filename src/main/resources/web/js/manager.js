@@ -788,6 +788,7 @@
       $("sName").value = s.dhabaName; $("sAddr").value = s.address; $("sPhone").value = s.phone;
       $("sTables").value = s.tableCount; $("sGst").value = s.gstPercent; $("sUpi").value = s.upiId || ""; $("sPayee").value = s.payeeName || "";
       $("sPerWaiter").value = s.tablesPerWaiter || 4;
+      $("lgUser").value = s.managerUser || "manager";
       paintSplash();
     }).catch(function (e) { toast(e.message, true); });
     loadGoogle();
@@ -813,6 +814,17 @@
       .catch(function (err) { toast(err.message, true); });
   });
 
+  $("credForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var np = $("lgNew").value;
+    if (np && np !== $("lgNew2").value) { toast("The two new passwords are not the same", true); return; }
+    api("POST", "/api/manager/login-settings", { username: $("lgUser").value.trim(), newPassword: np, currentPassword: $("lgCur").value })
+      .then(function (s) {
+        settings = s; $("lgNew").value = ""; $("lgNew2").value = ""; $("lgCur").value = "";
+        $("lgUser").value = s.managerUser || "";
+        toast("Login saved. Use the new username and password next time.");
+      }).catch(function (err) { toast(err.message, true); });
+  });
 
   // ================================================================= welcome picture + Google account / Drive (Settings)
   var gState = null;

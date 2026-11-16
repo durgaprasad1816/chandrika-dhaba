@@ -10,6 +10,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,12 +93,50 @@ final class Drive {
         this.store = store;
         this.zone = zone;
         load();
-        String envId = System.getenv("DHABA_GOOGLE_CLIENT_ID"), envSecret = System.getenv("DHABA_GOOGLE_CLIENT_SECRET");
-        if (clientId.isEmpty() && envId != null && !envId.isBlank()) clientId = envId.strip();
-        if (clientSecret.isEmpty() && envSecret != null && !envSecret.isBlank()) clientSecret = envSecret.strip();
-        // On hosts that wipe files (Render free plan) the sign-in is kept in these three settings instead of google.json.
-        String envRefresh = System.getenv("DHABA_GOOGLE_REFRESH_TOKEN");
-        if (refreshToken.isEmpty() && envRefresh != null && !envRefresh.isBlank()) { refreshToken = envRefresh.strip(); needsReconnect = false; }
+        // Order of precedence: what was typed in Settings (google.json) > host environment variables > google-defaults.properties
+        Properties baked = bakedDefaults();
+        if (clientId.isEmpty()) clientId = firstOf(System.getenv("DHABA_GOOGLE_CLIENT_ID"), baked.getProperty("client.id"));
+        if (clientSecret.isEmpty()) clientSecret = firstOf(System.getenv("DHABA_GOOGLE_CLIENT_SECRET"), baked.getProperty("client.secret"));
+        // On hosts that wipe files (Render free plan) the sign-in comes from here instead of google.json.
+        if (refreshToken.isEmpty()) {
+            String t = firstOf(System.getenv("DHABA_GOOGLE_REFRESH_TOKEN"), baked.getProperty("refresh.token"));
+            if (!t.isEmpty()) { refreshToken = t; needsReconnect = false; }
+        }
+        if (email.isEmpty()) email = firstOf(System.getenv("DHABA_OWNER_EMAIL"), baked.getProperty("owner.email"));
+    }
+
+    private static String firstOf(String... vals) {
+        for (String v : vals) if (v != null && !v.isBlank() && !v.strip().startsWith("PASTE_")) return v.strip();
+        return "";
+    }
+
+    /**
+     * google-defaults.properties holds the Google app keys and the saved Google sign-in of the dhaba owner, so a fresh,
+     * empty server (Render free plan) can reconnect to Drive and restore the data by itself. It is looked for next to
+     * the app (working folder, then the project folder) and finally inside the jar.
+     */
+    static Properties bakedDefaults() {
+        Properties p = new Properties();
+        List<Path> candidates = new ArrayList<>();
+        candidates.add(Paths.get("google-defaults.properties"));
+        try {
+            Path jar = Paths.get(Drive.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            Path folder = Files.isDirectory(jar) ? jar : jar.getParent();
+            if (folder != null) {
+                candidates.add(folder.resolve("google-defaults.properties"));
+                if (folder.getParent() != null) candidates.add(folder.getParent().resolve("google-defaults.properties"));
+            }
+        } catch (Exception ignored) { /* running from an unusual place; the other locations still work */ }
+        for (Path c : candidates) {
+            if (Files.isRegularFile(c)) {
+                try (var in = Files.newBufferedReader(c, StandardCharsets.UTF_8)) { p.load(in); return p; }
+                catch (IOException e) { System.err.println("Could not read " + c + ": " + e.getMessage()); }
+            }
+        }
+        try (var in = Drive.class.getResourceAsStream("/google-defaults.properties")) {
+            if (in != null) p.load(new java.io.InputStreamReader(in, StandardCharsets.UTF_8));
+        } catch (IOException ignored) { /* no defaults file */ }
+        return p;
     }
 
     // ================================================================= persistence
@@ -318,7 +358,8 @@ final class Drive {
             throw ApiException.bad("Google sign-in failed: " + e.getMessage());
         }
     }
-        // ================================================================= access token + HTTP
+
+    // ================================================================= access token + HTTP
 
     static final class DriveException extends Exception {
         final int status;
@@ -573,6 +614,7 @@ final class Drive {
     private final Map<String, String> uploadedSig = new ConcurrentHashMap<>();
     private final Map<String, String> backupIds = new ConcurrentHashMap<>();
     private volatile boolean backupStarted = false;
+    private volatile boolean restoreFailed = false;
     private volatile boolean dirty = false;
     private final Object backupLock = new Object();
     private volatile String backupFolderId = "";
@@ -597,7 +639,7 @@ final class Drive {
         Map<String, Object> r = apiJson("GET", API + "/files?supportsAllDrives=true&includeItemsFromAllDrives=true&pageSize=1&fields=" + enc("files(id,modifiedTime)") + "&q=" + enc(qq), null);
         List<Object> l = Json.list(r, "files");
         return l.isEmpty() ? null : Json.map(l.get(0));
-            }
+    }
 
     /** Call before the Store is created. Copies the Drive backup over the local files when the backup is newer than what this disk has. */
     void restoreIfNewer() {
@@ -637,7 +679,8 @@ final class Drive {
             Files.writeString(stampFile(), remote);
             System.out.println("Restore finished.");
         } catch (Exception e) {
-            System.err.println("Could not restore from Google Drive (continuing with the files on this disk): " + e.getMessage());
+            restoreFailed = true;
+            System.err.println("Could not restore from Google Drive; backups are paused so the saved copy is not overwritten: " + e.getMessage());
         }
     }
 
@@ -668,7 +711,21 @@ final class Drive {
     int backupChanged() {
         int n = 0;
         try {
+            if (restoreFailed) {
+                synchronized (this) { backupError = "Backup paused: your saved data could not be restored from Drive at start-up, so the app will not overwrite it. Restart the app."; }
+                return 0;
+            }
             String folder = backupFolder(true);
+            // Never replace a newer Drive backup with data that was not restored from it (for example a fresh, empty Render disk).
+            Map<String, Object> remoteMeta = fileMeta(folder, "store.json");
+            if (remoteMeta != null) {
+                String remote = Json.str(remoteMeta, "modifiedTime", "");
+                String stamp = readStamp();
+                if (stamp.isEmpty() || stamp.compareTo(remote) < 0) {
+                    synchronized (this) { backupError = "Backup paused: Google Drive already holds saved data that this app has not loaded. Set DHABA_GOOGLE_CLIENT_ID, DHABA_GOOGLE_CLIENT_SECRET and DHABA_GOOGLE_REFRESH_TOKEN on the host and restart, so it is restored first."; }
+                    return 0;
+                }
+            }
             String lastModified = "";
             for (String name : BACKUP_FILES) {
                 Path p = dir.resolve(name);

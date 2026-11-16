@@ -43,3 +43,12 @@ Pictures already go straight to Drive. Use **Back up now** to force a backup. Fr
 the first visit afterwards takes about a minute while the app wakes and restores.
 =======
 >>>>>>> origin/main
+
+
+---
+
+## Update: no Render settings needed
+
+Instead of the Render environment variables you can fill `src/main/resources/google-defaults.properties`
+(client.id, client.secret, refresh.token) in your PRIVATE repository. See START-HERE.md.
+Environment variables (`DHABA_GOOGLE_CLIENT_ID`, `DHABA_GOOGLE_CLIENT_SECRET`, `DHABA_GOOGLE_REFRESH_TOKEN`) still work and win over the file.
