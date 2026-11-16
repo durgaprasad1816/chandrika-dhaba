@@ -1,6 +1,5 @@
 package com.chandrika.dhaba;
 
-import com.chandrika.dhaba.Models.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +25,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+
+import com.chandrika.dhaba.Models.*;
+import com.chandrika.dhaba.Models.Bill;
+import com.chandrika.dhaba.Models.Category;
+import com.chandrika.dhaba.Models.Line;
+import com.chandrika.dhaba.Models.MenuItem;
+import com.chandrika.dhaba.Models.Order;
+import com.chandrika.dhaba.Models.Settings;
+import com.chandrika.dhaba.Models.TableState;
+import com.chandrika.dhaba.Models.Waiter;
 
 /**
  * All the dhaba's data and rules. Everything is kept in memory and saved to
@@ -70,13 +79,11 @@ final class Store {
     private long nextCat = 1;
     private long lastBackup = 0;
 
-<<<<<<< HEAD
-    Store(Path dir) { this(dir, null); }
+    Store(Path dir) {
+        this(dir, null);
+    }
 
     Store(Path dir, Drive prepared) {
-=======
-    Store(Path dir) {
->>>>>>> origin/main
         this.dir = dir;
         this.storeFile = dir.resolve("store.json");
         this.billsFile = dir.resolve("bills.jsonl");
@@ -100,12 +107,8 @@ final class Store {
         }
         loadBills();
         loadCollections();
-<<<<<<< HEAD
         this.drive = prepared != null ? prepared : new Drive(dir, this, zone);
         this.drive.attach(this);
-=======
-        this.drive = new Drive(dir, this, zone);
->>>>>>> origin/main
         this.media = new Media(dir, uploadsDir, privateDir, drive);
         drive.resume();
     }
@@ -289,10 +292,9 @@ final class Store {
             Files.writeString(tmp, Json.stringify(m), StandardCharsets.UTF_8);
             Files.move(tmp, storeFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             backupIfDue();
-<<<<<<< HEAD
-            if (drive != null) drive.markDirty();
-=======
->>>>>>> origin/main
+            if (drive != null) {
+                drive.markDirty();
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
