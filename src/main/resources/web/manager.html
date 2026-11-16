@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Chandrika Dhaba &amp; Restaurant - Manager</title>
+<link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/theme.css">
+<link rel="stylesheet" href="/css/manager.css">
+<link rel="stylesheet" href="/css/theme-green.css">
+</head>
+<body>
+
+<!-- ============ login ============ -->
+<section id="login" class="login" hidden>
+  <form id="loginForm" class="login-card" autocomplete="on">
+    <div class="login-logo">Chandrika Dhaba &amp; Restaurant</div>
+    <p class="login-sub">Manager login</p>
+    <label class="field"><span>Username</span><input id="lUser" name="username" autocomplete="username" required></label>
+    <label class="field"><span>Password</span><input id="lPass" name="password" type="password" autocomplete="current-password" required></label>
+    <p class="login-err" id="lErr" role="alert"></p>
+    <button class="btn gold block" type="submit" id="lBtn">Log in</button>
+  </form>
+</section>
+
+<!-- ============ app ============ -->
+<div id="shell" hidden>
+  <header class="bar">
+    <div class="bar-name">Chandrika Dhaba &amp; Restaurant <small>Manager</small></div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="tables" class="on" type="button">Tables <span class="badge" id="bTables" hidden></span></button>
+      <button data-tab="waiters" type="button">Waiters</button>
+      <button data-tab="payments" type="button">Payments <span class="badge" id="bPay" hidden></span></button>
+      <button data-tab="menu" type="button">Menu</button>
+      <button data-tab="kitchen" type="button">Kitchen Queue</button>
+      <button data-tab="reports" type="button">Reports</button>
+      <button data-tab="settings" type="button">Settings</button>
+    </nav>
+    <div class="bar-right">
+      <button class="btn small ghost snd" id="soundBtn" type="button" title="Beep when a waiter requests payment">Sound: on</button>
+      <button class="btn small gold" id="logoutBtn" type="button">Log out</button>
+    </div>
+  </header>
+
+  <div id="connWarn" class="warnbar err" hidden>Connection lost. Retrying...</div>
+
+  <main class="wrap">
+    <!-- tables -->
+    <section id="tab-tables">
+      <div class="counts" id="counts"></div>
+      <h2 class="h2">Tables</h2>
+      <div class="grid" id="tableGrid"></div>
+    </section>
+
+    <!-- waiters -->
+    <section id="tab-waiters" hidden>
+      <div class="row-head">
+        <h2 class="h2">Waiters</h2>
+        <div class="row-actions">
+          <button class="btn gold small" id="addWaiterBtn" type="button">+ Add waiter</button>
+          <button class="btn small" id="autoAssignBtn" type="button">Auto-assign tables</button>
+        </div>
+      </div>
+      <p class="hint" id="waiterHint"></p>
+      <div id="waiterList" class="wgrid"></div>
+      <h2 class="h2" style="margin-top:22px">Table allocation</h2>
+      <p class="hint">Choose the waiter for each table. A table with an open bill cannot be changed until it is paid.</p>
+      <div id="allocGrid" class="agrid"></div>
+    </section>
+
+    <!-- payments -->
+    <section id="tab-payments" hidden>
+      <div class="row-head">
+        <h2 class="h2">Payments from waiters</h2>
+        <form class="range" id="payForm">
+          <label>Date <input type="date" id="pDate"></label>
+          <button class="btn small" type="submit">Show</button>
+          <button class="btn small ghost" type="button" id="pToday">Today</button>
+        </form>
+      </div>
+      <p class="hint">Each table's sale for the day. When a waiter hands over the money, open the table, check the cash / UPI / card amounts and press <b>Mark as collected</b>.</p>
+      <div id="payBody"></div>
+    </section>
+
+    <!-- menu -->
+    <section id="tab-menu" hidden>
+      <div class="row-head">
+        <h2 class="h2">Menu</h2>
+        <div class="row-actions">
+          <button class="btn gold small" id="addItemBtn" type="button">+ Add item</button>
+<button class="btn small" id="addCatBtn" type="button">+ Add section</button>
+        </div>
+      </div>
+      <p class="hint">Add drinks, desserts or any dish with a price. It shows on the customer menu straight away.</p>
+      <div id="menuAdmin"></div>
+    </section>
+
+    <!-- kitchen queue -->
+    <section id="tab-kitchen" hidden>
+      <div class="row-head"><h2 class="h2">Kitchen Queue</h2><button class="btn small" type="button" onclick="location.reload()">Refresh</button></div>
+      <div id="kitchenBody"></div>
+    </section>
+
+    <!-- reports -->
+    <section id="tab-reports" hidden>
+      <div class="row-head">
+        <h2 class="h2">Reports</h2>
+        <form class="range" id="rangeForm">
+          <label>From <input type="date" id="rFrom"></label>
+          <label>To <input type="date" id="rTo"></label>
+          <button class="btn small" type="submit">Show</button>
+          <button class="btn small ghost" type="button" id="rToday">Today</button>
+          <button class="btn small ghost" type="button" id="rWeek">Last 7 days</button>
+        </form>
+      </div>
+      <div id="reportBody"></div>
+    </section>
+
+    <!-- settings -->
+    <section id="tab-settings" hidden>
+      <h2 class="h2">Settings</h2>
+      <div class="cols">
+        <form class="card" id="setForm">
+          <h3>Restaurant details</h3>
+          <label class="field"><span>Restaurant name</span><input id="sName" maxlength="60"></label>
+          <label class="field"><span>Address</span><input id="sAddr" maxlength="120"></label>
+          <label class="field"><span>Phone</span><input id="sPhone" maxlength="30"></label>
+          <label class="field"><span>Number of tables</span><input id="sTables" type="number" min="1" max="100"></label>
+          <label class="field"><span>GST % on bills (0 = no GST)</span><input id="sGst" type="number" min="0" max="28"></label>
+          <label class="field"><span>UPI ID for payments (e.g. chandrika@okaxis)</span><input id="sUpi" maxlength="60" autocapitalize="off"></label>
+          <label class="field"><span>Name shown on UPI payment</span><input id="sPayee" maxlength="60"></label>
+          <label class="field"><span>Tables for each waiter (limit)</span><input id="sPerWaiter" type="number" min="1" max="20"></label>
+          <button class="btn gold" type="submit">Save settings</button>
+        </form>
+
+        <div>
+          <div class="card" id="splashCard">
+            <h3>Welcome screen picture</h3>
+            <p class="hint">The round picture customers see on the opening animation. Use a square or landscape photo of your best dish (JPG, PNG or WebP, up to 3 MB).</p>
+            <div class="splash-prev"><img id="splashPrev" alt="Welcome screen picture preview"></div>
+            <div class="photo-action-row">
+              <label class="btn gold photo-action"><span>Choose new picture</span><input id="splashFile" type="file" accept="image/jpeg,image/png,image/webp"></label>
+              <button class="btn ghost" type="button" id="splashReset">Use the default picture</button>
+              <a class="btn small ghost" href="/" target="_blank" rel="noopener">Preview welcome screen</a>
+            </div>
+          </div>
+
+          <div class="card" id="googleCard">
+            <h3>Google account &amp; Drive</h3>
+            <p class="hint">Sign in with the Gmail account that owns your Drive. Every paid invoice (PDF + payment photo) is saved to your Drive folder, and dish photos, waiter photos and Aadhaar pictures are stored in your Drive too.</p>
+            <div id="gStatus" class="gstatus"></div>
+
+            <details class="gsetup" id="gSetup">
+              <summary>Google app keys (one-time setup)</summary>
+              <ol class="hint">
+                <li>Open <b>console.cloud.google.com</b> &rarr; create a project &rarr; <b>APIs &amp; Services</b> &rarr; enable <b>Google Drive API</b>.</li>
+                <li><b>OAuth consent screen</b>: choose External, add your Gmail as a <b>Test user</b>.</li>
+                <li><b>Credentials</b> &rarr; Create credentials &rarr; <b>OAuth client ID</b> &rarr; type <b>Web application</b>.</li>
+                <li>Under <b>Authorised redirect URIs</b> add exactly: <code id="gRedirect"></code></li>
+                <li>Copy the Client ID and Client secret here.</li>
+              </ol>
+              <label class="field"><span>Client ID</span><input id="gClientId" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+              <label class="field"><span>Client secret</span><input id="gClientSecret" type="password" autocomplete="new-password" placeholder="(saved - type only to change it)"></label>
+              <button class="btn small gold" type="button" id="gSaveKeys">Save keys</button>
+            </details>
+
+            <div class="photo-action-row" style="margin-top:12px">
+              <button class="btn gold" type="button" id="gSignIn">Sign in with Google</button>
+              <button class="btn ghost" type="button" id="gSignOut" hidden>Disconnect</button>
+            </div>
+            <p class="hint" id="gRedirectWarn" hidden></p>
+
+            <div id="gFolderBox" hidden>
+              <hr class="gsep">
+              <label class="field"><span>Invoice folder (paste the Google Drive folder link)</span>
+                <input id="gFolder" placeholder="https://drive.google.com/drive/folders/..." autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+              <label class="check"><input type="checkbox" id="gDaily"> <span>Create a new sub-folder for each day, named with the date (e.g. <b id="gToday"></b>)</span></label>
+              <div class="photo-action-row">
+                <button class="btn small gold" type="button" id="gSaveFolder">Save folder</button>
+                <button class="btn small ghost" type="button" id="gTodayFolder">Create today's folder now</button>
+                <a class="btn small ghost" id="gOpenFolder" href="#" target="_blank" rel="noopener" hidden>Open folder in Drive</a>
+              </div>
+              <p class="hint">Change this link any day you want invoices to go to a different folder. If you leave it empty, the app makes a folder called <b>Chandrika Dhaba - Invoices</b> in your Drive.</p>
+              <hr class="gsep">
+              <div class="photo-action-row">
+                <label class="field" style="margin:0"><span>Upload that day's invoices</span><input type="date" id="gSyncDate"></label>
+                <button class="btn small" type="button" id="gSync">Upload to Drive</button>
+                <button class="btn small ghost" type="button" id="gRetry">Retry waiting uploads</button>
+                <button class="btn small ghost" type="button" id="gMigrate">Move existing pictures to Drive</button>
+              </div>
+              <p class="hint" id="gQueue"></p>
+              <hr class="gsep">
+              <h4 style="margin:0 0 6px">Automatic data backup</h4>
+              <p class="hint">Dishes, waiters, settings and bills are copied to Drive (folder <b>Chandrika Dhaba - Data / Backup</b>) a few seconds after every change, and brought back automatically when the app starts on an empty disk (for example on Render's free plan).</p>
+              <div class="photo-action-row">
+                <button class="btn small" type="button" id="gBackup">Back up now</button>
+                <button class="btn small ghost" type="button" id="gHostKey">Show key for Render</button>
+              </div>
+              <p class="hint" id="gBackupStatus"></p>
+              <pre id="gHostKeyBox" hidden style="white-space:pre-wrap;word-break:break-all;user-select:all;font-size:12px"></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Table QR codes</h3>
+            <p class="hint">Print one QR for each table and stick it on the table. Customers scan it to open the menu for that table.</p>
+            <label class="field"><span>Website address the QR should open</span><input id="qrBase" placeholder="http://192.168.1.10:8080" autocapitalize="off"></label>
+            <p class="hint" id="qrHint"></p>
+            <button class="btn gold" type="button" id="qrOpen">Open printable QR sheet</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ modals ============ -->
+<div id="modal" class="modal-back" hidden>
+  <div class="modal" id="modalBox" role="dialog" aria-modal="true"></div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="/js/manager.js"></script>
+</body>
+</html>
